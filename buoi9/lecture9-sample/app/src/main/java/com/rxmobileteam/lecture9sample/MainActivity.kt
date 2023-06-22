@@ -1,7 +1,7 @@
 package com.rxmobileteam.lecture9sample
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import com.rxmobileteam.lecture9sample.features.feeds.FeedsFragment
@@ -20,5 +20,9 @@ class MainActivity : AppCompatActivity() {
         )
       }
     }
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
   }
 }

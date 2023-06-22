@@ -1,7 +1,6 @@
-package com.rxmobileteam.lecture9sample.features.feeds.collections
+package com.rxmobileteam.lecture9sample.features.feeds.photos
 
 import android.util.Log
-import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,49 +9,51 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.rxmobileteam.lecture9sample.ServiceLocator
 import com.rxmobileteam.lecture9sample.data.remote.UnsplashApiService
-import com.rxmobileteam.lecture9sample.data.remote.response.CollectionListResponseItem
-import com.rxmobileteam.lecture9sample.features.feeds.photos.PhotosUiState
-import kotlinx.coroutines.CancellationException
+import com.rxmobileteam.lecture9sample.data.remote.response.PhotoListResponseItem
+import com.rxmobileteam.lecture9sample.features.feeds.collections.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.CancellationException
 
-@MainThread
-inline fun <T : Any> MutableLiveData<T>.update(f: (T) -> T): T {
-    check(isInitialized)
-    val current = this.value as T
-
-    val updated = f(current)
-    this.value = updated
-
-    return updated
-}
-
-class CollectionsViewModel(
+class PhotosViewModel (
     private val unsplashApiService: UnsplashApiService
 ) : ViewModel() {
-    private val _uiStateLiveData =
-        MutableLiveData<CollectionsUiState>(CollectionsUiState.FirstPageLoading)
 
-    val uiStateLiveData: LiveData<CollectionsUiState> get() = _uiStateLiveData
+    private val _uiStateLiveData = MutableLiveData<PhotosUiState>(PhotosUiState.FirstPageLoading)
+
+    val uiStateLiveData: LiveData<PhotosUiState> get() = _uiStateLiveData
 
     init {
         loadFirstPage()
     }
 
+    companion object {
+        private const val TAG = "PhotosViewModel"
+        private const val PER_PAGE = 30
+
+        fun factory(): ViewModelProvider.Factory = viewModelFactory {
+            addInitializer(PhotosViewModel::class) {
+                PhotosViewModel(
+                    unsplashApiService = ServiceLocator.unsplashApiService
+                )
+            }
+        }
+    }
+
     private fun loadFirstPage() {
         viewModelScope.launch {
-            _uiStateLiveData.update { CollectionsUiState.FirstPageLoading }
+            _uiStateLiveData.update { PhotosUiState.FirstPageLoading }
 
             try {
-                val responses = unsplashApiService.getCollections(
+                val responses = unsplashApiService.getPhotos(
                     page = 1,
-                    perPage = PER_PAGE,
+                    perPage = PhotosViewModel.PER_PAGE,
                 )
-                Log.d(TAG, "loadFirstPage: success")
+                Log.d(PhotosViewModel.TAG, "loadFirstPage: success")
 
                 _uiStateLiveData.update {
-                    CollectionsUiState.Page(
+                    PhotosUiState.Page(
                         pageNumber = 1,
-                        items = responses.map { it.toCollectionUiItem() },
+                        items = responses.map { it.toPhotoUiItem() },
                         isLoading = false,
                         error = null
                     )
@@ -61,10 +62,10 @@ class CollectionsViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
-                Log.e(TAG, "loadFirstPage: failed", e)
+                Log.e(PhotosViewModel.TAG, "loadFirstPage: failed", e)
 
                 _uiStateLiveData.update {
-                    CollectionsUiState.FirstPageFailure(error = e)
+                    PhotosUiState.FirstPageFailure(error = e)
                 }
             }
         }
@@ -72,14 +73,13 @@ class CollectionsViewModel(
 
     fun loadNextPage() {
         val currentState = _uiStateLiveData.value
-        if (currentState !is CollectionsUiState.Page) {
+        if (currentState !is PhotosUiState.Page) {
             // ignore
             return
         }
 
         if (!currentState.isLoading
             && currentState.error == null
-            && currentState.pageNumber >= 1
             && currentState.items.isNotEmpty()
         ) {
 
@@ -92,16 +92,16 @@ class CollectionsViewModel(
 
             viewModelScope.launch {
                 try {
-                    val newPageItems = unsplashApiService.getCollections(
+                    val newPageItems = unsplashApiService.getPhotos(
                         page = newPageNumber,
-                        perPage = PER_PAGE
+                        perPage = PhotosViewModel.PER_PAGE
                     )
-                    Log.d(TAG, "loadNextPage: success")
+                    Log.d(PhotosViewModel.TAG, "loadNextPage: success")
 
                     _uiStateLiveData.update {
                         currentState.copy(
                             pageNumber = newPageNumber,
-                            items = (currentState.items + newPageItems.map { it.toCollectionUiItem() })
+                            items = (currentState.items + newPageItems.map { it.toPhotoUiItem() })
                                 .distinctBy { it.id },
                             isLoading = false,
                             error = null,
@@ -110,7 +110,7 @@ class CollectionsViewModel(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Throwable) {
-                    Log.e(TAG, "loadNextPage: failed", e)
+                    Log.e(PhotosViewModel.TAG, "loadNextPage: failed", e)
 
                     _uiStateLiveData.update {
                         currentState.copy(
@@ -125,7 +125,7 @@ class CollectionsViewModel(
 
     fun retry() {
         val currentState = _uiStateLiveData.value
-        if (currentState !is CollectionsUiState.Page) {
+        if (currentState !is PhotosUiState.Page) {
             loadFirstPage()
             return
         }
@@ -137,24 +137,14 @@ class CollectionsViewModel(
         }
         loadNextPage()
     }
-
-    companion object {
-        private const val TAG = "CollectionsViewModel"
-        private const val PER_PAGE = 30
-
-        fun factory(): ViewModelProvider.Factory = viewModelFactory {
-            addInitializer(CollectionsViewModel::class) {
-                CollectionsViewModel(
-                    unsplashApiService = ServiceLocator.unsplashApiService
-                )
-            }
-        }
-    }
 }
 
-private fun CollectionListResponseItem.toCollectionUiItem(): CollectionUiItem = CollectionUiItem(
+private fun PhotoListResponseItem.toPhotoUiItem(): PhotosUiItem = PhotosUiItem(
     id = id,
-    title = title,
+    title = altDescription,
     description = description.orEmpty(),
-    coverUrl = coverPhoto.urls.full,
+    coverUrl = urls.full,
+    authorUrl = user.profileImage.medium,
+    nameAuthor = user.name,
+    like = likes
 )

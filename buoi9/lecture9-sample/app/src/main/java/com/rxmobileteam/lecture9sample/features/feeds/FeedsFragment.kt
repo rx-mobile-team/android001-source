@@ -18,7 +18,6 @@ class FeedsFragment : BaseFragment<FragmentFeedsBinding>(FragmentFeedsBinding::i
             }
         }
     }
-
     private fun setupViewPagerAndTabs() {
         binding.run {
             viewPager.adapter = FeedsViewPagerAdapter(this@FeedsFragment)
