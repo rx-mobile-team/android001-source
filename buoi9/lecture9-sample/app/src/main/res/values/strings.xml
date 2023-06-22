@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">lecture9-sample</string>
+    <string name="search_by_image">search by image</string>
+    <string name="search_by_user">search by user</string>
 </resources>

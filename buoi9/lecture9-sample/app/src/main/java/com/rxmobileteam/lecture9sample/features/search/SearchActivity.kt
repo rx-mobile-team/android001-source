@@ -53,7 +53,11 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                viewModel.queryTextChange(s.toString())
+                if (binding.rdbSearchByUser.isChecked){
+                    viewModel.queryTextChangeSearchUser(s.toString())
+                }else{
+                    viewModel.queryTextChangeSearchPhoto(s.toString())
+                }
             }
         })
     }

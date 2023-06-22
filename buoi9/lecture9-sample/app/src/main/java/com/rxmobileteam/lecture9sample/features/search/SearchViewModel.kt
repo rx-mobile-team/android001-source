@@ -18,11 +18,13 @@ class SearchViewModel(
     private val unsplashApiService: UnsplashApiService
 ) : ViewModel() {
 
-    private val _queryLiveData = MutableLiveData<String>("")
-    val queryLiveData get() = _queryLiveData
+    private val _queryLiveDataSearchPhoto = MutableLiveData<String>("")
+    val queryLiveDataSearchPhoto get() = _queryLiveDataSearchPhoto
 
+    private val _queryLiveDataSearchUser = MutableLiveData<String>("")
+    val queryLiveDataSearchUser get() = _queryLiveDataSearchUser
 
-    val resultSearchPhotos = queryLiveData
+    val resultSearchPhotos = queryLiveDataSearchPhoto
         .debounce(
             duration = 500,
             coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -49,8 +51,39 @@ class SearchViewModel(
             }
         }
 
-    fun queryTextChange(query: String) {
-        _queryLiveData.postValue(query)
+
+    val resultSearchUsers = queryLiveDataSearchUser
+        .debounce(
+            duration = 500,
+            coroutineScope = CoroutineScope(Dispatchers.Main)
+        ).switchMap { query ->
+            liveData {
+                try {
+                    val resultSearch = unsplashApiService.searchUsers(
+                        query = query,
+                        page = 1,
+                        perPage = 10
+                    ).results.map {
+                        CollectionUiItem(
+                            id = it.id,
+                            title = it.name ?: "",
+                            description = it.location ?: "",
+                            coverUrl = it.profileImage.large
+                        )
+                    }
+                    emit(resultSearch)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+
+    fun queryTextChangeSearchPhoto(query: String) {
+        _queryLiveDataSearchPhoto.postValue(query)
+    }
+
+    fun queryTextChangeSearchUser(query: String) {
+        _queryLiveDataSearchUser.postValue(query)
     }
 
     fun <T> LiveData<T>.debounce(duration: Long = 1000L, coroutineScope: CoroutineScope) =
