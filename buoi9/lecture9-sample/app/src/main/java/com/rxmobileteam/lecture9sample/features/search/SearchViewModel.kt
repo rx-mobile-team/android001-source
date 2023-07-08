@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.rxmobileteam.lecture9sample.ServiceLocator
 import com.rxmobileteam.lecture9sample.data.remote.UnsplashApiService
 import com.rxmobileteam.lecture9sample.features.feeds.collections.CollectionUiItem
+import com.rxmobileteam.lecture9sample.features.search.repository.SearchRepository
 import com.rxmobileteam.lecture9sample.utils.debounce
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -21,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import java.util.concurrent.TimeUnit
 
 class SearchViewModel(
-  private val unsplashApiService: UnsplashApiService
+  private val searchRepository: SearchRepository,
 ) : ViewModel() {
   private val _querySubject = BehaviorSubject.createDefault("")
   private val _resultSearchPhotos = MutableLiveData<List<CollectionUiItem>>(emptyList())
@@ -33,7 +34,7 @@ class SearchViewModel(
     .filter { it.isNotBlank() }
     .distinctUntilChanged()
     .switchMap { query ->
-      unsplashApiService
+      searchRepository
         .searchPhotosRx(
           query = query,
           page = 1,
@@ -110,10 +111,10 @@ class SearchViewModel(
   }
 
   companion object {
-    fun factory() = viewModelFactory {
-      addInitializer(SearchViewModel::class) {
-        SearchViewModel(unsplashApiService = ServiceLocator.unsplashApiService)
-      }
-    }
+//    fun factory() = viewModelFactory {
+//      addInitializer(SearchViewModel::class) {
+//        SearchViewModel(unsplashApiService = ServiceLocator.unsplashApiService)
+//      }
+//    }
   }
 }

@@ -8,6 +8,7 @@ import com.rxmobileteam.lecture9sample.base.BaseFragment
 import com.rxmobileteam.lecture9sample.databinding.FragmentSearchPhotosBinding
 import com.rxmobileteam.lecture9sample.extensions.setupVertically
 import com.rxmobileteam.lecture9sample.features.feeds.collections.CollectionUiItemAdapter
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 
 class SearchPhotoFragment :
   BaseFragment<FragmentSearchPhotosBinding>(FragmentSearchPhotosBinding::inflate) {
@@ -18,10 +19,13 @@ class SearchPhotoFragment :
     )
   }
 
+//
+//  private val viewModel by activityViewModels<SearchViewModel>(
+//    factoryProducer = SearchViewModel::factory,
+//  )
 
-  private val viewModel by activityViewModels<SearchViewModel>(
-    factoryProducer = SearchViewModel::factory,
-  )
+  private val viewModel by activityViewModel<SearchViewModel>()
+
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)

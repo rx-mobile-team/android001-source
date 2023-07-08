@@ -76,4 +76,10 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxkotlin:3.0.1'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava3:2.9.0'
+
+
+    implementation "io.insert-koin:koin-core:3.3.3"
+    implementation "io.insert-koin:koin-android:3.3.3"
+    implementation 'io.insert-koin:koin-android-ext:3.0.2'
+
 }
