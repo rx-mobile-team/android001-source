@@ -4,11 +4,15 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.rxmobileteam.lecture9sample.GlideApp
+import com.rxmobileteam.lecture9sample.SharedBetweenFragmentsInAnActivity
 import com.rxmobileteam.lecture9sample.base.BaseFragment
 import com.rxmobileteam.lecture9sample.databinding.FragmentSearchPhotosBinding
 import com.rxmobileteam.lecture9sample.extensions.setupVertically
 import com.rxmobileteam.lecture9sample.features.feeds.collections.CollectionUiItemAdapter
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SearchPhotoFragment :
   BaseFragment<FragmentSearchPhotosBinding>(FragmentSearchPhotosBinding::inflate) {
 
@@ -18,10 +22,15 @@ class SearchPhotoFragment :
     )
   }
 
+  @Inject
+  lateinit var sharedBetweenFragmentsInAnActivity: SharedBetweenFragmentsInAnActivity
 
-  private val viewModel by activityViewModels<SearchViewModel>(
-    factoryProducer = SearchViewModel::factory,
-  )
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    sharedBetweenFragmentsInAnActivity.doSomething(this)
+  }
+
+  private val viewModel by activityViewModels<SearchViewModel>()
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)

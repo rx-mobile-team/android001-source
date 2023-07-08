@@ -14,10 +14,10 @@ class MyAppGlideModule : AppGlideModule() {
   override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
     super.registerComponents(context, glide, registry)
 
-    registry.replace(
-      GlideUrl::class.java,
-      InputStream::class.java,
-      OkHttpUrlLoader.Factory(ServiceLocator.okHttpClient)
-    )
+//    registry.replace(
+//      GlideUrl::class.java,
+//      InputStream::class.java,
+//      OkHttpUrlLoader.Factory(AppModule.okHttpClient)
+//    )
   }
 }

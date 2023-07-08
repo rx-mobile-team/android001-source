@@ -1,26 +1,22 @@
 package com.rxmobileteam.lecture9sample.features.search
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.rxmobileteam.lecture9sample.ServiceLocator
+import com.rxmobileteam.lecture9sample.AppModule
 import com.rxmobileteam.lecture9sample.data.remote.UnsplashApiService
 import com.rxmobileteam.lecture9sample.features.feeds.collections.CollectionUiItem
-import com.rxmobileteam.lecture9sample.utils.debounce
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.kotlin.subscribeBy
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class SearchViewModel(
+@HiltViewModel
+class SearchViewModel @Inject constructor(
   private val unsplashApiService: UnsplashApiService
 ) : ViewModel() {
   private val _querySubject = BehaviorSubject.createDefault("")
@@ -107,13 +103,5 @@ class SearchViewModel(
   fun queryTextChange(query: String) {
 //    _queryLiveData.value = query
     _querySubject.onNext(query)
-  }
-
-  companion object {
-    fun factory() = viewModelFactory {
-      addInitializer(SearchViewModel::class) {
-        SearchViewModel(unsplashApiService = ServiceLocator.unsplashApiService)
-      }
-    }
   }
 }

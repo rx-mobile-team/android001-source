@@ -4,18 +4,17 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.rxmobileteam.lecture9sample.ServiceLocator
 import com.rxmobileteam.lecture9sample.data.remote.UnsplashApiService
 import com.rxmobileteam.lecture9sample.data.remote.response.CollectionListResponseItem
 import com.rxmobileteam.lecture9sample.extensions.update
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class CollectionsViewModel(
+@HiltViewModel
+class CollectionsViewModel @Inject constructor(
   private val unsplashApiService: UnsplashApiService
 ) : ViewModel() {
   private val _uiStateLiveData =
@@ -119,14 +118,6 @@ class CollectionsViewModel(
   companion object {
     private const val TAG = "CollectionsViewModel"
     private const val PER_PAGE = 30
-
-    fun factory(): ViewModelProvider.Factory = viewModelFactory {
-      addInitializer(CollectionsViewModel::class) {
-        CollectionsViewModel(
-          unsplashApiService = ServiceLocator.unsplashApiService
-        )
-      }
-    }
   }
 }
 
