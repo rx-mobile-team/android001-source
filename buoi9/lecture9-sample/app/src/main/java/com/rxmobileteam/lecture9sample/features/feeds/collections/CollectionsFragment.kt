@@ -9,15 +9,24 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.rxmobileteam.lecture9sample.GlideApp
+import com.rxmobileteam.lecture9sample.PrefsManager
+import com.rxmobileteam.lecture9sample.SharedBetweenFragmentsInAnActivity
 import com.rxmobileteam.lecture9sample.base.BaseFragment
 import com.rxmobileteam.lecture9sample.databinding.FragmentCollectionsBinding
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
+@AndroidEntryPoint
 class CollectionsFragment :
   BaseFragment<FragmentCollectionsBinding>(FragmentCollectionsBinding::inflate) {
-  private val viewModel by viewModels<CollectionsViewModel>(
-    factoryProducer = CollectionsViewModel::factory
-  )
+  @Inject
+  lateinit var prefsManager: PrefsManager
+
+  @Inject
+  lateinit var sharedBetweenFragmentsInAnActivity: SharedBetweenFragmentsInAnActivity
+
+  private val viewModel by viewModels<CollectionsViewModel>()
 
   private val collectionUiItemAdapter by lazy(NONE) {
     CollectionUiItemAdapter(
@@ -25,8 +34,17 @@ class CollectionsFragment :
     )
   }
 
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    sharedBetweenFragmentsInAnActivity.doSomething(this)
+  }
+
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+
+    Log.d(this::class.java.simpleName, "prefsManager -> $prefsManager")
+    Log.d(this::class.java.simpleName, "prefsManager -> ${prefsManager.isDarkMode()}")
+    prefsManager.toggle()
 
     setupViews()
     bindVM()

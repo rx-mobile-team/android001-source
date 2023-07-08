@@ -7,26 +7,25 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.android.material.tabs.TabLayoutMediator
-import com.rxmobileteam.lecture9sample.ServiceLocator
+import com.rxmobileteam.lecture9sample.AppModule
+import com.rxmobileteam.lecture9sample.SharedBetweenFragmentsInAnActivity
 import com.rxmobileteam.lecture9sample.databinding.ActivitySearchBinding
 import com.rxmobileteam.lecture9sample.features.search.SearchManageAdapter.Companion.TAB_PHOTOS
 import com.rxmobileteam.lecture9sample.features.search.SearchManageAdapter.Companion.TAB_USERS
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SearchActivity : AppCompatActivity() {
 
   private val binding by lazy {
     ActivitySearchBinding.inflate(layoutInflater)
   }
 
-  private val viewModel by viewModels<SearchViewModel>(
-    factoryProducer = {
-      viewModelFactory {
-        addInitializer(SearchViewModel::class) {
-          SearchViewModel(unsplashApiService = ServiceLocator.unsplashApiService)
-        }
-      }
-    }
-  )
+  @Inject
+  lateinit var sharedBetweenFragmentsInAnActivity: SharedBetweenFragmentsInAnActivity
+
+  private val viewModel by viewModels<SearchViewModel>()
 
   private val tabIndex by lazy {
     mapOf(
@@ -40,6 +39,8 @@ class SearchActivity : AppCompatActivity() {
     setContentView(binding.root)
     setupAdapterTab()
     setupSearchText()
+
+    sharedBetweenFragmentsInAnActivity.doSomething(this)
   }
 
   private fun setupSearchText() {
